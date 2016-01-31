@@ -1,0 +1,14 @@
+{
+  "node": true,
+  "esnext": true,
+  "bitwise": true,
+  "eqeqeq": true,
+  "strict": true,
+  "noarg": true,
+  "camelcase": true,
+  "quotmark": "single",
+  "undef": true,
+  "smarttabs": true,
+  "trailing": true,
+  "indent": 4
+}

@@ -1,0 +1,29 @@
+{
+  "name": "gulp-fcount",
+  "version": "0.1.0",
+  "description": "Display line count per function within a file for javascript",
+  "license": "MIT",
+  "author": "Tyler Pflueger",
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "gulpplugin",
+    "maintenance",
+    "coverage"
+  ],
+  "dependencies": {
+    "chalk": "^1.1.1",
+    "gulp-util": "^3.0.7",
+    "through2": "^2.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^2.3.4"
+  }
+}
