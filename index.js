@@ -63,13 +63,14 @@ module.exports = function () {
 	}
 
 	function finishCount(cb) {
-		this.result = calculateResults();
-		gutil.log(chalk.underline.blue('Total Function Sizes'));
-		gutil.log(chalk.black('Function Count:\t', this.result.total));
-		gutil.log(chalk.red('\t76+  lines:\t', convertToPercentage(this.result.line76, this.result.total)));
-		gutil.log(chalk.yellow('51 - 75   lines:\t', convertToPercentage(this.result.line75, this.result.total)));
-		gutil.log(chalk.blue('26 - 50   lines:\t', convertToPercentage(this.result.line50, this.result.total)));
-		gutil.log(chalk.green(' 1 - 25   lines:\t', convertToPercentage(this.result.line25, this.result.total)));
+		var result = calculateResults();
+        
+        gutil.log(chalk.underline.bold.magenta('Total Function Sizes'));
+		gutil.log(chalk.blue('Function Count:', result.total));
+		gutil.log(chalk.red('\t76+ lines:', convertToPercentage(result.line76, result.total)));
+		gutil.log(chalk.yellow('51 - 75  lines:', convertToPercentage(result.line75, result.total)));
+		gutil.log(chalk.blue('26 - 50  lines:', convertToPercentage(result.line50, result.total)));
+		gutil.log(chalk.green(' 1 - 25  lines:', convertToPercentage(result.line25, result.total)));
 		cb();
 	}
 
