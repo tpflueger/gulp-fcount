@@ -86,9 +86,9 @@ module.exports = function () {
 		completedArray.forEach(function(item) {
 			if(item.count <= 25) {
 				result.line25++;
-			} else if(item.count >= 26 && item.count <= 50) {
+			} else if(item.count <= 50) {
 				result.line50++;
-			} else if(item.count >= 51 && item.count <= 75) {
+			} else if(item.count <= 75) {
 				result.line75++;
 			} else {
 				result.line76++;
