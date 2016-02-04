@@ -64,7 +64,7 @@ module.exports = function () {
 
 	function finishCount(cb) {
 		var result = calculateResults(),
-            converter = PercentConverter(result.total),
+            converter = new PercentConverter(result.total),
             lines = [
                 chalk.underline.bold.magenta('Total Function Sizes'),
                 chalk.blue('Function Count:', result.total),
@@ -73,7 +73,7 @@ module.exports = function () {
                 chalk.blue('26 - 50  lines:', converter.percent(result.line50)),
                 chalk.green(' 1 - 25  lines:', converter.percent(result.line25))
             ];
-        
+
         lines.forEach(function(line) { gutil.log(line); });
 		cb();
 	}
@@ -105,14 +105,12 @@ module.exports = function () {
 
     function PercentConverter(total) {
         var _total = total,
-            obj = {};
+            obj = this;
         
         obj.percent = function(fraction) {
             var percent = Math.round((fraction / _total) * 100);
             return percent < 10 ? '0' + percent + '%' : percent + '%';
         };
-        
-        return obj;
     }
     
 	function FunctionClass(lineStart, name, count, fileName) {
