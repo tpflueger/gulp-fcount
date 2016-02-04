@@ -63,14 +63,18 @@ module.exports = function () {
 	}
 
 	function finishCount(cb) {
-		var result = calculateResults();
+		var result = calculateResults(),
+            converter = PercentConverter(result.total),
+            lines = [
+                chalk.underline.bold.magenta('Total Function Sizes'),
+                chalk.blue('Function Count:', result.total),
+                chalk.red('\t76+ lines:', converter.percent(result.line76)),
+                chalk.yellow('51 - 75  lines:', converter.percent(result.line75)),
+                chalk.blue('26 - 50  lines:', converter.percent(result.line50)),
+                chalk.green(' 1 - 25  lines:', converter.percent(result.line25))
+            ];
         
-        gutil.log(chalk.underline.bold.magenta('Total Function Sizes'));
-		gutil.log(chalk.blue('Function Count:', result.total));
-		gutil.log(chalk.red('\t76+ lines:', convertToPercentage(result.line76, result.total)));
-		gutil.log(chalk.yellow('51 - 75  lines:', convertToPercentage(result.line75, result.total)));
-		gutil.log(chalk.blue('26 - 50  lines:', convertToPercentage(result.line50, result.total)));
-		gutil.log(chalk.green(' 1 - 25  lines:', convertToPercentage(result.line25, result.total)));
+        lines.forEach(function(line) { gutil.log(line); });
 		cb();
 	}
 
@@ -99,11 +103,18 @@ module.exports = function () {
 		return result;
 	}
 
-	function convertToPercentage(number, total) {
-		var result = Math.round((number / total) * 100);
-		return result < 10 ? '0' + result  + '%' : result + '%';
-	}
-
+    function PercentConverter(total) {
+        var _total = total,
+            obj = {};
+        
+        obj.percent = function(fraction) {
+            var percent = Math.round((fraction / _total) * 100);
+            return percent < 10 ? '0' + percent + '%' : percent + '%';
+        };
+        
+        return obj;
+    }
+    
 	function FunctionClass(lineStart, name, count, fileName) {
 		this.lineStart = lineStart;
 		this.name = name;
