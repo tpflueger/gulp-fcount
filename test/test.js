@@ -5,7 +5,9 @@ var assert = require('assert'),
 	gutil = require('gulp-util'),
 	testExample = require('./test-example')(),
 	content = testExample.createContents(),
-	fcount = require('./../index');
+	fcount = require('./../index'),
+    File = require('vinyl'),
+    sinon = require('sinon');
 
 describe('Should handle file contents', function (cb) {
 	var stream = fcount();
@@ -41,4 +43,42 @@ describe('Should handle file contents', function (cb) {
 			cb();
 		});
 	});
+});
+
+describe('NEW - Should handle file contents', function() {
+    function fakeFile(contents) {
+        return new File({
+            path: __dirname,
+            contents: new Buffer(contents)
+        });
+    }
+
+    function processFile(contents, cb) {
+        var file = fakeFile(contents);
+        plugin.write(file);
+        plugin.end();
+        plugin.on('finish', cb);
+    }
+    
+    var plugin = fcount();
+    
+    beforeEach(function() {
+        String.prototype.contains = function(substring) {
+            return this.indexOf(substring) != -1;
+        };
+        gutil.log = sinon.spy();
+    });
+    
+    it('Should count single-line functions', function(done) {
+        var fileContents = [
+                'function inline() { }',
+                'function inline() { }'
+            ].join('\n');
+        
+        processFile(fileContents, function() {
+            var output = gutil.log.getCall(1).args[0];
+            assert(output.contains('Function Count: 2'));
+            done();
+        });
+    });
 });
