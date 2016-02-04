@@ -18,15 +18,17 @@ module.exports = function () {
 		var fileContent = file.contents.toString('ascii').split('\n');
 
 		fileContent.forEach(function (line, i) {
-			if(line.match(/function\s?\w*\((.)*\)/)) {
+			if(line.match(/function(.)*?\((.)*?\)\s*\{\s*$/)) {
 				incrementLineCount();
 				fileArray.push(new FunctionClass(++i, getFunctionName(line), 0, file.relative));
 				return;
-			}
-
-			checkLineCharacters(line, i);
-
-			incrementLineCount();
+			} else if(line.match(/function(.)*?\((.)*?\)\s*\{(.)*?\}\s*$/)) {
+                incrementLineCount();
+                completedArray.push(new FunctionClass(i, getFunctionName(line), 1, file.relative));
+            } else {
+                checkLineCharacters(line, i);
+                incrementLineCount();
+            }
 		});
 
 		cb(null, file);
@@ -56,7 +58,7 @@ module.exports = function () {
 
 		function incrementLineCount() {
 			fileArray.forEach(function (item) {
-				if(item === '{') { return;}
+                if(item === '{') { return;}
 				item.count++;
 			});
 		}
