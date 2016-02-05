@@ -5,7 +5,8 @@ var assert = require('assert'),
 	fcount = require('./../index'),
     File = require('vinyl'),
     sinon = require('sinon'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    stream;
 
 function fakeFile(contents) {
     return new File({
@@ -16,9 +17,9 @@ function fakeFile(contents) {
 
 function processFile(contents, cb) {
     var file = fakeFile(contents);
-    plugin.write(file);
-    plugin.end();
-    plugin.on('finish', cb);
+    stream.write(file);
+    stream.end();
+    stream.on('finish', cb);
 }
 
 function genFunc(lineCount) {
@@ -32,11 +33,9 @@ function genFunc(lineCount) {
     return funcStr;
 }
 
-describe('fcount', function() {
-    var plugin;
-        
+describe('fcount', function() {        
     beforeEach(function() {
-        plugin  = fcount();
+        stream  = fcount();
         gutil.log = sinon.spy();
         String.prototype.contains = function(substring) {
             return this.indexOf(substring) != -1;
