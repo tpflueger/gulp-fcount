@@ -1,84 +1,109 @@
 'use strict';
 
 var assert = require('assert'),
-	path = require('path'),
 	gutil = require('gulp-util'),
-	testExample = require('./test-example')(),
-	content = testExample.createContents(),
 	fcount = require('./../index'),
     File = require('vinyl'),
-    sinon = require('sinon');
+    sinon = require('sinon'),
+    _ = require('lodash');
 
-describe('Should handle file contents', function (cb) {
-	var stream = fcount();
+function fakeFile(contents) {
+    return new File({
+        path: __dirname,
+        contents: new Buffer(contents)
+    });
+}
 
-	stream.write(new gutil.File({
-		path: path.join(__dirname, 'fixture.js'),
-		contents: new Buffer(content.file)
-	}));
+function processFile(contents, cb) {
+    var file = fakeFile(contents);
+    plugin.write(file);
+    plugin.end();
+    plugin.on('finish', cb);
+}
 
-	stream.end();
-
-	it('Should set line25 results', function () {
-		stream.on('finish', function () {
-			assert.strictEqual(stream.result.line25, content.result.line25);
-		});
-	});
-
-	it('Should set line50 results', function () {
-		stream.on('finish', function () {
-			assert.strictEqual(stream.result.line50, content.result.line50);
-		});
-	});
-
-	it('Should set line75 results', function () {
-		stream.on('finish', function () {
-			assert.strictEqual(stream.result.line75, content.result.line75);
-		});
-	});
-
-	it('Should set line76 results', function () {
-		stream.on('finish', function () {
-			assert.strictEqual(stream.result.line75, content.result.line75);
-			cb();
-		});
-	});
-});
-
-describe('NEW - Should handle file contents', function() {
-    function fakeFile(contents) {
-        return new File({
-            path: __dirname,
-            contents: new Buffer(contents)
-        });
-    }
-
-    function processFile(contents, cb) {
-        var file = fakeFile(contents);
-        plugin.write(file);
-        plugin.end();
-        plugin.on('finish', cb);
-    }
+function genFunc(lineCount) {
+    var linesStr = lineCount ? _.repeat('\n', lineCount + 1) : '',
+        funcStr = '';
     
-    var plugin = fcount();
-    
+    switch (Math.floor(Math.random() * 2)) {
+        case 0: funcStr = 'function name() {' + linesStr + '}'; break;
+        case 1: funcStr = 'function() {' + linesStr + '}'; break;
+    }
+    return funcStr;
+}
+
+describe('fcount', function() {
+    var plugin;
+        
     beforeEach(function() {
+        plugin  = fcount();
+        gutil.log = sinon.spy();
         String.prototype.contains = function(substring) {
             return this.indexOf(substring) != -1;
         };
-        gutil.log = sinon.spy();
     });
     
-    it('Should count single-line functions', function(done) {
-        var fileContents = [
-                'function inline() { }',
-                'function inline() { }'
-            ].join('\n');
+    describe('When given file', function() {
+        var fileContents;
         
-        processFile(fileContents, function() {
-            var output = gutil.log.getCall(1).args[0];
-            assert(output.contains('Function Count: 2'));
+        beforeEach(function() {
+            fileContents = [
+                genFunc(76),
+                genFunc(51), genFunc(75),
+                genFunc(26), genFunc(50), genFunc(49),
+                genFunc(1), genFunc(25), genFunc(24), genFunc(23)
+            ].join('\n');
+        });
+        
+        it('Should count number of functions', function(done) {
+            processFile(fileContents, function() {
+                var output = gutil.log.args[1][0];
+                assert(output.contains('Function Count: 8'));
+            });
             done();
+        });
+        
+        it('Should count and categorize function lengths', function(done) {
+            processFile(fileContents, function() {
+                var output = {
+                    lines76: gutil.log.args[2][0],
+                    lines75: gutil.log.args[3][0],
+                    lines50: gutil.log.args[4][0],
+                    lines25: gutil.log.args[5][0]
+                };
+                assert(output.lines76.contains('76+ lines: 10%'));
+                assert(output.lines75.contains('51 - 75  lines: 20%'));
+                assert(output.lines50.contains('26 - 50  lines: 30%'));
+                assert(output.lines25.contains('1 - 25  lines: 40%'));
+                done();
+            });
+        });
+    });
+    
+    describe('When passed file with inline functions', function() {
+        var fileContents;
+        
+        beforeEach(function() {
+            fileContents = [
+                genFunc(),
+                genFunc()
+            ].join('\n');
+        });
+
+        it('Should count number of functions', function(done) {
+            processFile(fileContents, function() {
+                var output = gutil.log.args[1][0];
+                assert(output.contains('Function Count: 2'));
+                done();
+            });
+        });
+        
+        it('Should categorize function lengths as one', function(done) {
+            processFile(fileContents, function() {
+                var output = gutil.log.args[5][0];
+                assert(output.contains('1 - 25  lines: 100%'));
+                done();
+            });
         });
     });
 });
