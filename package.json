@@ -4,6 +4,7 @@
   "description": "Display line count per function within a file for javascript",
   "license": "MIT",
   "author": "Tyler Pflueger",
+  "repository": "tpflueger/gulp-fcount",
   "engines": {
     "node": ">=0.12.0"
   },

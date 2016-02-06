@@ -2,7 +2,7 @@
 
 var assert = require('assert'),
 	gutil = require('gulp-util'),
-	fcount = require('./../index'),
+	fcount = require('./index'),
 	File = require('vinyl'),
 	sinon = require('sinon'),
 	_ = require('lodash'),
@@ -25,7 +25,7 @@ function processFile(contents, cb) {
 function genFunc(lineCount) {
 	var linesStr = lineCount ? _.repeat('\n', lineCount + 1) : '',
 		funcStr = '';
-	
+
 	switch (Math.floor(Math.random() * 2)) {
 		case 0: funcStr = 'function name() {' + linesStr + '}'; break;
 		case 1: funcStr = 'function() {' + linesStr + '}'; break;
@@ -33,7 +33,7 @@ function genFunc(lineCount) {
 	return funcStr;
 }
 
-describe('fcount', function() {		
+describe('fcount', function() {
 	beforeEach(function() {
 		stream  = fcount();
 		gutil.log = sinon.spy();
@@ -41,10 +41,10 @@ describe('fcount', function() {
 			return this.indexOf(substring) != -1;
 		};
 	});
-	
+
 	describe('When given file', function() {
 		var fileContents;
-		
+
 		beforeEach(function() {
 			fileContents = [
 				genFunc(76),
@@ -53,7 +53,7 @@ describe('fcount', function() {
 				genFunc(1), genFunc(25), genFunc(24), genFunc(23)
 			].join('\n');
 		});
-		
+
 		it('Should count number of functions', function(done) {
 			processFile(fileContents, function() {
 				var output = gutil.log.args[1][0];
@@ -61,7 +61,7 @@ describe('fcount', function() {
 			});
 			done();
 		});
-		
+
 		it('Should count and categorize function lengths', function(done) {
 			processFile(fileContents, function() {
 				var output = {
@@ -78,10 +78,10 @@ describe('fcount', function() {
 			});
 		});
 	});
-	
+
 	describe('When passed file with inline functions', function() {
 		var fileContents;
-		
+
 		beforeEach(function() {
 			fileContents = [
 				genFunc(),
@@ -96,7 +96,7 @@ describe('fcount', function() {
 				done();
 			});
 		});
-		
+
 		it('Should categorize function lengths as one', function(done) {
 			processFile(fileContents, function() {
 				var output = gutil.log.args[5][0];
