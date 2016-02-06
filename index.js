@@ -4,8 +4,10 @@ var through = require('through2'),
     gutil = require('gulp-util'),
     fs = require('fs');
 
-module.exports = function () {
+module.exports = function (opts) {
     var completedArray  = [];
+    opts = opts || {};
+
 
     return through.obj(transform, finishCount);
 
@@ -20,11 +22,11 @@ module.exports = function () {
         fileContent.forEach(function (line, i) {
             if(line.match(/function(.)*?\((.)*?\)\s*\{\s*$/)) {
                 incrementLineCount();
-                fileArray.push(new FunctionClass(++i, getFunctionName(line), 0, file.relative));
+                fileArray.push(new FunctionClass(file.base, ++i, getFunctionSignature(line), 0, file.relative));
                 return;
             } else if(line.match(/function(.)*?\((.)*?\)\s*\{(.)*?\}\s*$/)) {
                 incrementLineCount();
-                completedArray.push(new FunctionClass(i, getFunctionName(line), 1, file.relative));
+                completedArray.push(new FunctionClass(file.base,i, getFunctionSignature(line), 1, file.relative));
             } else {
                 checkLineCharacters(line, i);
                 incrementLineCount();
@@ -33,9 +35,8 @@ module.exports = function () {
 
         cb(null, file);
 
-        function getFunctionName(line) {
-            var functionName = line.match(/function\s?(\w+)/);
-            return functionName !== null ? functionName[1] : 'anonymous';
+        function getFunctionSignature(line) {
+            return line.match(/function(.)*?\((.)*?\)/)[0];
         }
 
         function checkLineCharacters(line, i) {
@@ -100,6 +101,10 @@ module.exports = function () {
                 result.line76++;
             }
             result.total++;
+
+            if(opts.showFunctions) {
+                gutil.log([item.path, '(', item.lineStart, ')','\t', item.functionSig, '\t\t', item.count, ' lines'].join(''));
+            }
         });
 
         return result;
@@ -115,9 +120,10 @@ module.exports = function () {
         };
     }
 
-    function FunctionClass(lineStart, name, count, fileName) {
+    function FunctionClass(base, lineStart, functionSig, count, fileName) {
+        this.path = base + fileName;
         this.lineStart = lineStart;
-        this.name = name;
+        this.functionSig = functionSig;
         this.count = count;
         this.fileName = fileName;
     }

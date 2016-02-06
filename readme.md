@@ -25,6 +25,20 @@ gulp.task('scripts', function () {
 		.pipe(gulp.dest('./dist/'));
 });
 ```
+
+## API
+
+### fcount([options])
+
+#### options
+
+##### showFunctions
+
+Type: `boolean`  
+Default: `false`
+
+Displays every function with path, line start, and number of lines.
+
 ## License
 
 MIT © Tyler Pflueger

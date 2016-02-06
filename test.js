@@ -22,11 +22,12 @@ function processFile(contents, cb) {
 	stream.on('finish', cb);
 }
 
-function genFunc(lineCount) {
+function genFunc(lineCount, switchCase) {
 	var linesStr = lineCount ? _.repeat('\n', lineCount + 1) : '',
 		funcStr = '';
 
-	switch (Math.floor(Math.random() * 2)) {
+    switchCase = switchCase || Math.floor(Math.random() * 2);
+	switch (switchCase) {
 		case 0: funcStr = 'function name() {' + linesStr + '}'; break;
 		case 1: funcStr = 'function() {' + linesStr + '}'; break;
 	}
@@ -105,4 +106,42 @@ describe('fcount', function() {
 			});
 		});
 	});
+
+    describe('When passed showFunctions', function () {
+        var fileContents;
+
+        beforeEach(function () {
+            stream = fcount({showFunctions: true });
+            fileContents = [
+                genFunc(25, 1)
+            ].join('\n');
+        });
+
+        it('Should display file path', function (done) {
+            processFile(fileContents, function () {
+                var output = gutil.log.args[0][0];
+
+                assert(output.contains('gulp-fcount(1)'));
+                done();
+            });
+        });
+
+        it('Should display function name', function (done) {
+            processFile(fileContents, function () {
+                var output = gutil.log.args[0][0];
+
+                assert(output.contains('function()'));
+                done();
+            });
+        });
+
+        it('Should display line count', function (done) {
+            processFile(fileContents, function () {
+                var output = gutil.log.args[0][0];
+
+                assert(output.contains('25 lines'));
+                done();
+            });
+        });
+    });
 });
